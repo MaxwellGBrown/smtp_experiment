@@ -3,6 +3,25 @@ import socket
 import sys
 
 
+class Command:
+    """Represents an SMTP command."""
+
+    def __init__(self, raw):
+        """Turn raw message into readable message."""
+        self.command, *rest = raw.split(b" ")
+        self.data = b" ".join(rest).rstrip(b"\r\n")
+
+
+def receive(connection):
+    """Receive command from connection."""
+    message = b""
+    while not message.endswith(b"\r\n"):
+        message += connection.recv(1024)
+
+    print("Received message: {}".format(message.decode().rstrip("\r\n")))
+    return Command(message)
+
+
 def main(host="localhost", port=8888):
     """Run an SMTP server."""
     with socket.socket() as incoming:
@@ -19,12 +38,9 @@ def main(host="localhost", port=8888):
                 # Greet the connection
                 connection.send(b"220 OK\r\n")
 
-                message = b""
-                while not message.endswith(b"\r\n"):
-                    message += connection.recv(1024)
+                while (command := receive(connection)).command != b"QUIT":
+                    connection.send(b"220 OK\r\n")
 
-                print(message)
-                connection.send(b"250 OK\r\n")
             print("Connection closed!")
 
 
