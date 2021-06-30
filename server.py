@@ -6,11 +6,11 @@ https://datatracker.ietf.org/doc/html/rfc5321
 SMTP Status Codes & Responses
 https://datatracker.ietf.org/doc/html/rfc3463
 """
+import argparse
 import socket
-import sys
 
 
-def main(host="localhost", port=8888):
+def main(host="localhost", port=587):
     """Run an SMTP server."""
     with socket.socket() as incoming:
         incoming.bind((host, port))
@@ -85,4 +85,9 @@ def main(host="localhost", port=8888):
 
 
 if __name__ == "__main__":
-    main(port=int(sys.argv[1]))
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("--host", default="localhost")
+    argument_parser.add_argument("--port", default=587)
+
+    kwargs = vars(argument_parser.parse_args())
+    main(**kwargs)
